@@ -4,5 +4,9 @@
   "scripts": {
     "start": "npm --prefix 01basicreact start",
     "build": "npm --prefix 01basicreact run build"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.2",
+    "tailwindcss": "^4.3.2"
   }
 }
