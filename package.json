@@ -1,0 +1,8 @@
+{
+  "name": "react-project-root",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix 01basicreact start",
+    "build": "npm --prefix 01basicreact run build"
+  }
+}
