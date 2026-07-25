@@ -2,28 +2,27 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRouter from './routes/user_route.js';
-import authRouter from './routes/auth_route.js'
+import authRouter from './routes/auth_route.js';
+import uploadRouter from "./routes/uploadroute.js";
+import multer from "multer";
+
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URL).then(() => {
-    console.log('Connected to MongoDB!');
-}).catch((err) => {
-    console.log(err);
-});
-
 const app = express();
+const port = process.env.PORT || 5000;
 
 app.use(express.json());
-
-app.listen(5000, () => {
-    console.log('Server is running on port 5000!');
+app.use("/api/upload", uploadRouter);
+app.get("/", (req, res) => {
+    res.send("API is running");
 });
+
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 
 app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
+    const statusCode = err instanceof multer.MulterError ? 400 : err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
     return res.status(statusCode).json({
         success: false,
@@ -31,3 +30,18 @@ app.use((err, req, res, next) => {
         message,
     });
 });
+
+const startServer = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URL);
+        console.log('Connected to MongoDB!');
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}!`);
+        });
+    } catch (error) {
+        console.error("Failed to start the server:", error.message);
+        process.exit(1);
+    }
+};
+
+startServer();
