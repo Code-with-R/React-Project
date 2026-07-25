@@ -5,6 +5,7 @@ import userRouter from './routes/user_route.js';
 import authRouter from './routes/auth_route.js';
 import uploadRouter from "./routes/uploadroute.js";
 import multer from "multer";
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
     res.send("API is running");
 });
 
+app.use(cookieParser());
 
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
