@@ -1,11 +1,11 @@
 import cloudinary from "../config/cloudinary.js";
 import User from "../models/user_mode.js";
 
-const uploadBufferToCloudinary = (fileBuffer) => {
+const uploadBufferToCloudinary = (fileBuffer, folder = "mern-project/users") => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        folder: "mern-project/users",
+        folder,
         resource_type: "image",
         transformation: [
           {
@@ -28,6 +28,41 @@ const uploadBufferToCloudinary = (fileBuffer) => {
 
     uploadStream.end(fileBuffer);
   });
+};
+
+export const uploadListingImages = async (req, res, next) => {
+  const uploadedImages = [];
+
+  try {
+    if (!req.files?.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one image",
+      });
+    }
+
+    for (const file of req.files) {
+      const result = await uploadBufferToCloudinary(
+        file.buffer,
+        "mern-project/listings"
+      );
+      uploadedImages.push({
+        url: result.secure_url,
+        publicId: result.public_id,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `${uploadedImages.length} image(s) uploaded successfully`,
+      images: uploadedImages,
+    });
+  } catch (error) {
+    await Promise.allSettled(
+      uploadedImages.map((image) => cloudinary.uploader.destroy(image.publicId))
+    );
+    next(error);
+  }
 };
 
 export const uploadImage = async (req, res, next) => {
