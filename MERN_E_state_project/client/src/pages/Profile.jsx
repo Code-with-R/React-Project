@@ -11,6 +11,7 @@ import {
   signOutUserSuccess,
   signOutUserFailure,
 } from "../redux/user/userSlice";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const maxImageSize = 5 * 1024 * 1024;
@@ -189,9 +190,9 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-3 max-w-lg mx-auto gap-4">
-      <h1 className='text-3xl font-semibold text-center my-7 '>Profile</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col">
+    <div className="p-3 max-w-lg mx-auto flex flex-col gap-4">
+      <h1 className="text-3xl font-semibold text-center py-5">Profile</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="file"
           ref={fileRef}
@@ -203,21 +204,21 @@ export default function Profile() {
           onClick={() => !uploading && fileRef.current.click()}
           src={currentUser?.avatar}
           alt="profile"
-          className={`rounded-full h-24 w-24 object-cover self-center mt-2 ${uploading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+          className={`rounded-full h-24 w-24 object-cover self-center ${uploading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
             }`}
         />
-        <p className="text-sm text-center my-2">
+        <p className="text-sm text-center">
           {uploading
             ? `Uploading: ${uploadProgress}% (${imageSize})`
             : imageSize
               ? `Image size: ${imageSize}`
               : "Click the image to change it"}
         </p>
-        <p className="text-xs text-slate-500 text-center mb-2">
+        <p className="text-xs text-slate-500 text-center">
           Maximum image size: 5 MB
         </p>
         {uploading && (
-          <div className="w-full h-2 bg-slate-200 rounded-full mb-3 overflow-hidden">
+          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-600 rounded-full transition-all duration-200"
               style={{ width: `${uploadProgress}%` }}
@@ -229,7 +230,7 @@ export default function Profile() {
           </div>
         )}
         {uploadError && (
-          <p className="text-red-700 text-sm text-center mb-2">{uploadError}</p>
+          <p className="text-red-700 text-sm text-center">{uploadError}</p>
         )}
         <input
           type="text"
@@ -260,17 +261,18 @@ export default function Profile() {
           className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80">
           {loading ? "Updating..." : "Update"}
         </button>
-        {error && <p className="text-red-700 mt-3">{error}</p>}
+        {error && <p className="text-red-700">{error}</p>}
         {updateSuccess && (
-          <p className="text-green-700 mt-3">Profile updated successfully.</p>
+          <p className="text-green-700">Profile updated successfully.</p>
         )}
+        <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={'/create-listing'}>
+        Create Listing
+        </Link>
       </form>
-      <div className="flex justify-between mt-5">
+      <div className="flex justify-between">
         <span onClick={handleDeleteUser} className="text-red-700 cursor-pointer">Delete account</span>
         <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign out</span>
       </div>
-      <p className="text-red-700 mt-5">{error ? error : ''}</p>
-      <p className="text-red-700 mt-5">{updateSuccess ? 'user is updated successfully!' : ''}</p>
     </div>
   )
 }
