@@ -21,10 +21,19 @@ const listingSchema = new mongoose.Schema(
         discountPrice: {
             type: Number,
             required: true,
+            min: 0,
+        },
+        bedrooms: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 10,
         },
         bathrooms: {
             type: Number,
             required: true,
+            min: 1,
+            max: 10,
         },
         furnished: {
             type: Boolean,
@@ -37,17 +46,23 @@ const listingSchema = new mongoose.Schema(
         type: {
             type: String,
             required: true,
+            enum: ['sale', 'rent'],
         },
         offer: {
             type: Boolean,
             required: true,
         },
         imageUrls: {
-            type: Array,
+            type: [String],
             required: true,
+            validate: {
+                validator: (images) => images.length >= 1 && images.length <= 6,
+                message: 'A listing must have between 1 and 6 images',
+            },
         },
         userRef: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
             required: true,
         },
 

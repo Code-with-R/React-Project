@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,16 +18,14 @@ export default function CreateListing() {
         address: '',
         type: 'rent',
         bedrooms: 1,
-        bathroom: 1,
+        bathrooms: 1,
         regularPrice: 5000,
         discountPrice: 0,
         offer: false,
         parking: false,
         furnished: false,
     });
-    console.log(formData);
-    
-    const [error, setError] = useState(false);
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const handleImageSubmit = async () => {
         setImageUploadError('');
@@ -123,56 +121,76 @@ export default function CreateListing() {
     };
 
     const handleChange = (e) => {
-        if (e.target.id === 'sale' || e.target.id === 'rent') {
-            setFormData({
-                ...formData,
-                type: e.target.id
-            })
+        const { id, type, value, checked } = e.target;
+
+        if (id === 'sale' || id === 'rent') {
+            setFormData((previousData) => ({
+                ...previousData,
+                type: id,
+            }));
+            return;
         }
 
-        if (e.target.id === 'parking' || e.target.id === 'furnished' || e.target.id === 'offer') {
-            setFormData({
-                ...formData,
-                [e.target.id]: e.target.checked
-            })
+        if (type === 'checkbox') {
+            setFormData((previousData) => ({
+                ...previousData,
+                [id]: checked,
+                ...(id === 'offer' && !checked ? { discountPrice: 0 } : {}),
+            }));
+            return;
         }
-        if (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'textarea') {
-            setFormData({
-                ...formData,
-                [e.target.id]: e.target.value,
-            })
-        }
+
+        setFormData((previousData) => ({
+            ...previousData,
+            [id]: type === 'number' ? Number(value) : value,
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if(formData.imageUrls.length <1) return setError('You must upload at least one image');
-            if(+formData.regularPrice < +discountPrice) return setError('Discount price must be lower than regular price');
+            if (!currentUser?._id) {
+                setError('You must be signed in to create a listing.');
+                return;
+            }
+            if (formData.imageUrls.length < 1) {
+                setError('You must upload at least one image.');
+                return;
+            }
+            if (
+                formData.offer &&
+                Number(formData.discountPrice) >= Number(formData.regularPrice)
+            ) {
+                setError('Discount price must be lower than regular price.');
+                return;
+            }
 
             setLoading(true);
-            setError(false);
+            setError('');
             const res = await fetch('/api/listing/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     ...formData,
-                    useRef:currentUser._id,
+                    userRef: currentUser._id,
                 }),
             });
             const data = await res.json();
-            setLoading(false);
-            if (data.success === false) {
-                setError(data.message);
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Could not create listing.');
             }
+
             navigate(`/listing/${data._id}`);
         } catch (error) {
             setError(error.message);
+        } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <main className='p-3 max-w-3xl mx-auto'>
@@ -222,7 +240,7 @@ export default function CreateListing() {
                         <div className="flex gap-2">
                             <input
                                 type="checkbox"
-                                id='Rent'
+                                id='rent'
                                 className='w-5'
                                 onChange={handleChange}
                                 checked={formData.type === 'rent'}
@@ -283,7 +301,7 @@ export default function CreateListing() {
                                 required
                                 className='p-3 border border-gray-300 rounded-lg'
                                 onChange={handleChange}
-                                value={formData.bathroom}
+                                value={formData.bathrooms}
                             />
                             <p>Baths</p>
                         </div>
@@ -320,7 +338,7 @@ export default function CreateListing() {
                                 <span className='text-xs'>₹ / month</span>
                             </div>
                         </div>
-                        )}; 
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-col flex-1 gap-4">
