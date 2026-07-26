@@ -69,6 +69,24 @@ export const google = async (req, res, next) => {
             }).status(200).json(rest);
         }
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
+
+export const signOut = async (req, res, next) => {
+    try {
+        res
+            .clearCookie('access_token', {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: process.env.NODE_ENV === "production",
+            })
+            .status(200)
+            .json({
+                success: true,
+                message: 'User has been logged out!',
+            });
+    } catch (error) {
+        next(error);
+    }
+};
