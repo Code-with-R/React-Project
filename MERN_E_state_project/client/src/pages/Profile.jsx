@@ -32,6 +32,7 @@ export default function Profile() {
   const [listingsVisible, setListingsVisible] = useState(false);
   const [listingsLoading, setListingsLoading] = useState(false);
   const [listingsError, setListingsError] = useState("");
+  const [deletingListingId, setDeletingListingId] = useState(null);
 
   const formatFileSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -220,6 +221,34 @@ export default function Profile() {
     }
   };
 
+  const handleListingDelete = async (listingId) => {
+    if (!window.confirm("Are you sure you want to delete this listing?")) {
+      return;
+    }
+
+    try {
+      setDeletingListingId(listingId);
+      setListingsError("");
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Could not delete the listing");
+      }
+
+      setUserListings((previousListings) =>
+        previousListings.filter((listing) => listing._id !== listingId)
+      );
+    } catch (error) {
+      setListingsError(error.message);
+    } finally {
+      setDeletingListingId(null);
+    }
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto flex flex-col gap-4">
       <h1 className="text-3xl font-semibold text-center py-5">Profile</h1>
@@ -343,6 +372,16 @@ export default function Profile() {
               >
                 {listing.name}
               </Link>
+              <div className="flex flex-col items-center">
+                <button
+                  type="button"
+                  onClick={() => handleListingDelete(listing._id)}
+                  disabled={deletingListingId === listing._id}
+                  className="text-red-700 uppercase disabled:opacity-60"
+                >
+                  {deletingListingId === listing._id ? "Deleting..." : "Delete"}
+                </button>
+              </div>
             </div>
           ))}
         </div>

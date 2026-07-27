@@ -1,5 +1,6 @@
 import Listing from "../models/listing.model.js";
 import { errorHandler } from "../utils/error.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const createListing = async (req, res, next) =>{
     try {
@@ -37,6 +38,52 @@ export const getListing = async (req, res, next) => {
         const listing = await Listing.findById(req.params.id);
         if (!listing) return next(errorHandler(404, "Listing not found"));
         res.status(200).json(listing);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteListing = async (req, res, next) => {
+    try {
+        const listing = await Listing.findById(req.params.id);
+
+        if (!listing) {
+            return next(errorHandler(404, 'Listing not found!'));
+        }
+
+        if (req.user.id !== listing.userRef.toString()) {
+            return next(errorHandler(403, 'You can only delete your own listings!'));
+        }
+
+        await Listing.findByIdAndDelete(req.params.id);
+
+        const publicIds = listing.imageUrls
+            .map((imageUrl) => {
+                try {
+                    const uploadPath = new URL(imageUrl).pathname.split('/upload/')[1];
+                    if (!uploadPath) return null;
+                    const withoutVersion = uploadPath.replace(/^v\d+\//, '');
+                    const publicId = decodeURIComponent(
+                        withoutVersion.replace(/\.[^/.]+$/, '')
+                    );
+                    return publicId.startsWith('mern-project/listings/')
+                        ? publicId
+                        : null;
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean);
+
+        await Promise.allSettled(
+            publicIds.map((publicId) => cloudinary.uploader.destroy(publicId))
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Listing has been deleted!',
+            listingId: listing._id,
+        });
     } catch (error) {
         next(error);
     }
