@@ -28,6 +28,10 @@ export default function Profile() {
     email: currentUser?.email || "",
     password: "",
   });
+  const [userListings, setUserListings] = useState([]);
+  const [listingsVisible, setListingsVisible] = useState(false);
+  const [listingsLoading, setListingsLoading] = useState(false);
+  const [listingsError, setListingsError] = useState("");
 
   const formatFileSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -189,6 +193,33 @@ export default function Profile() {
     }
   };
 
+  const handleShowListings = async () => {
+    if (listingsVisible) {
+      setListingsVisible(false);
+      return;
+    }
+
+    try {
+      setListingsLoading(true);
+      setListingsError("");
+      const res = await fetch(`/api/user/listings/${currentUser._id}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Could not load your listings");
+      }
+
+      setUserListings(Array.isArray(data) ? data : []);
+      setListingsVisible(true);
+    } catch (error) {
+      setListingsError(error.message);
+    } finally {
+      setListingsLoading(false);
+    }
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto flex flex-col gap-4">
       <h1 className="text-3xl font-semibold text-center py-5">Profile</h1>
@@ -266,13 +297,56 @@ export default function Profile() {
           <p className="text-green-700">Profile updated successfully.</p>
         )}
         <Link className="bg-green-700 text-white p-3 rounded-lg uppercase text-center hover:opacity-95" to={'/create-listing'}>
-        Create Listing
+          Create Listing
         </Link>
       </form>
       <div className="flex justify-between">
         <span onClick={handleDeleteUser} className="text-red-700 cursor-pointer">Delete account</span>
         <span onClick={handleSignOut} className="text-red-700 cursor-pointer">Sign out</span>
       </div>
+      <button
+        type="button"
+        onClick={handleShowListings}
+        disabled={listingsLoading}
+        className="text-green-700 w-full cursor-pointer disabled:opacity-60"
+      >
+        {listingsLoading
+          ? "Loading listings..."
+          : listingsVisible
+            ? "Hide Listings"
+            : "Show Listings"}
+      </button>
+      {listingsError && (
+        <p className="text-red-700 text-center">{listingsError}</p>
+      )}
+      {listingsVisible && userListings.length === 0 && (
+        <p className="text-slate-600 text-center">
+          You have not created any listings yet.
+        </p>
+      )}
+      {listingsVisible && userListings.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-center text-2xl font-semibold">Your Listings</h2>
+          {userListings.map((listing) => (
+            <div key={listing._id}
+              className="border rounded-lg p-3 flex justify-between items-center gap-4">
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls?.[0]}
+                  alt={`${listing.name} cover`}
+                  className="h-16 w-16 object-cover rounded"
+                />
+              </Link>
+              <Link
+                className="text-slate-700 font-semibold hover:underline truncate flex-1"
+                to={`/listing/${listing._id}`}
+              >
+                {listing.name}
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
