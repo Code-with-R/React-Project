@@ -381,6 +381,9 @@ export default function Profile() {
                 >
                   {deletingListingId === listing._id ? "Deleting..." : "Delete"}
                 </button>
+                <Link to={`/update-listing/${listing._id}`}>
+                  <button className="text-green-700 uppercase disabled:opacity-60">Edit</button>
+                </Link>
               </div>
             </div>
           ))}
