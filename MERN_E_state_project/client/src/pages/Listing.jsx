@@ -246,7 +246,7 @@ export default function Listing() {
   return (
     <main className='min-h-screen bg-[#f7f8f5] pb-10 text-black'>
       {/* Image Gallery Section */}
-      <section className='relative mx-auto h-56 w-full max-w-6xl overflow-hidden bg-slate-200 sm:h-72 lg:h-[330px]'>
+      <section className='relative mx-auto h-56 w-full max-w-6xl overflow-hidden bg-slate-200 sm:h-72 lg:h-330px'>
         <Swiper
           modules={[Navigation, Pagination, Autoplay, Keyboard, A11y]}
           slidesPerView={1}

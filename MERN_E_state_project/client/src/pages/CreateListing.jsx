@@ -350,7 +350,7 @@ export default function CreateListing() {
                     <div>
                         <textarea
                             placeholder='Description'
-                            className={`border p-3 rounded-lg w-full min-h-[100px] ${
+                            className={`border p-3 rounded-lg w-full min-h-100px ${
                                 fieldErrors.description ? 'border-red-500' : 'border-gray-300'
                             }`}
                             id='description'
@@ -553,7 +553,7 @@ export default function CreateListing() {
                                 type='button'
                                 onClick={uploading ? handleCancelUpload : handleImageSubmit}
                                 disabled={!files.length && !uploading}
-                                className={`p-3 border rounded uppercase hover:shadow-lg disabled:opacity-50 cursor-pointer min-w-[80px] ${
+                                className={`p-3 border rounded uppercase hover:shadow-lg disabled:opacity-50 cursor-pointer min-w-80px] ${
                                     uploading 
                                         ? 'border-red-500 text-red-500 hover:bg-red-50'
                                         : 'border-green-700 text-green-700 hover:bg-green-50'
