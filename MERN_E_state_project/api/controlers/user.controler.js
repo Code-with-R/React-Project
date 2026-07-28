@@ -65,3 +65,17 @@ export const getUserListings = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getUserContact = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.params.id).select('username email');
+
+        if (!user) {
+            return next(errorHandler(404, 'Landlord not found'));
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        next(error);
+    }
+};

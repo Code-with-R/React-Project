@@ -43,6 +43,27 @@ export const getListing = async (req, res, next) => {
     }
 };
 
+export const getSimilarListings = async (req, res, next) => {
+    try {
+        const currentListing = await Listing.findById(req.params.id);
+
+        if (!currentListing) {
+            return next(errorHandler(404, 'Listing not found'));
+        }
+
+        const listings = await Listing.find({
+            _id: { $ne: currentListing._id },
+            type: currentListing.type,
+        })
+            .sort({ createdAt: -1 })
+            .limit(3);
+
+        res.status(200).json(listings);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const deleteListing = async (req, res, next) => {
     try {
         const listing = await Listing.findById(req.params.id);
