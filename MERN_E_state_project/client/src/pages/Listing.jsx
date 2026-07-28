@@ -337,8 +337,8 @@ export default function Listing() {
           </span>
           <span className='rounded bg-green-700 px-4 py-2 text-center text-xs font-bold text-white shadow-sm sm:text-sm'>
             {listing.offer
-              ? `$${discountAmount.toLocaleString()} discount`
-              : `$${displayPrice.toLocaleString()}`}
+              ? `$${discountAmount.toLocaleString('en-US')} discount`
+              : `$${displayPrice.toLocaleString('en-US')}`}
           </span>
         </div>
 
