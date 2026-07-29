@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import Listing from './Listing';
+import { useLocation } from 'react-router-dom';
 import ListingCard from '../Components/ListingCard';
 
 export default function Search() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [sidebardata, setSidebardata] = useState({
         searchTerm: '',
         type: 'all',
         parking: false,
         furnished: false,
         offer: false,
-        sort: 'created_at',
+        sort: 'createdAt',
         order: 'desc',
     });
     
@@ -45,14 +46,14 @@ export default function Search() {
                 parking: parkingFormUrl === 'true' ? true : false,
                 furnished: furnishedFormUrl === 'true' ? true : false,
                 offer: offerFormUrl === 'true' ? true : false,
-                sort: sortFormUrl || 'created_at',
+                sort: sortFormUrl || 'createdAt',
                 order: orderFormUrl || 'desc',
             });
         }
 
         const fetchListings = async () =>{
             setLoading(true);
-            serShowMore(false);
+            setShowMore(false);
             const searchQuery = urlParams.toString();
             const res = await fetch(`/api/listing/get?${searchQuery}`);
             const data = await res.json();
@@ -78,13 +79,12 @@ export default function Search() {
 
         if (e.target.id === 'parking' || e.target.id === 'furnished' || e.target.id === 'offer') {
             setSidebardata({
-                ...sidebardata, [e.target.id]: e.target.checked || e.target.checked === 'true' ?
-                    true : false,
+                ...sidebardata, [e.target.id]: e.target.checked,
             });
         }
 
         if (e.target.id === 'sort_order') {
-            const sort = e.target.value.split('_')[0] || 'created_at';
+            const sort = e.target.value.split('_')[0] || 'createdAt';
 
             const order = e.target.value.split('_')[1] || 'desc';
 
@@ -188,7 +188,7 @@ export default function Search() {
                             id="sort_order"
                             className='border rounded-lg p-3'
                             onChange={handleChange}
-                            defaultValue={'created_at_desc'}>
+                            defaultValue={'createdAt_desc'}>
                             <option value="regularPrice_desc">Price high to low</option>
                             <option value="regularPrice_asc">Price low to high</option>
                             <option value="createdAt_desc">Latest</option>
